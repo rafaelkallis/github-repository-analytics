@@ -2,9 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Github Reposistory Analytics</title>
-</head>
-<body>
+    <title>GitHub Repository Analytics</title>
 
+    <link rel="stylesheet" href="main.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/trianglify/0.4.0/trianglify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/async/2.0.1/async.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Slabo+27px" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+    <script src="main.js"></script>
+    <script src="typed_input.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script></head>
+<body>
+    <div id="wrap" style="position: absolute">
+        <div>
+            <input id="input" type="text" placeholder=""/>
+            <div id="analytics-panel" class="container" style="display: none">
+                <div class="row">
+                    <div id="left-panel" class="col-sm-3" style="display: flex;">
+                        <div>
+                            <a id="owner-url"><img id="owner-image"></a>
+                            <a id="repository-url"><span id="repository-name" style="font-size: 1.5em;"></span></a>
+                            <div id="repository-attributes">
+                                <div class="col-sm-4">
+                                    <i class="fa fa-eye fa-2x" aria-hidden="true" style="display: block;"></i>
+                                    <span id="repository-subscribers"></span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <i class="fa fa-star fa-2x" aria-hidden="true" style="display: block;"></i>
+                                    <span id="repository-stargazers"></span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <i class="fa fa-code-fork fa-2x" aria-hidden="true" style="display: block;"></i>
+                                    <span id="repository-forks"></span>
+                                </div>
+                            </div>
+                            <span>Language: </span>
+                            <span id="repository-language"></span>
+                        </div>
+                    </div>
+                    <div id="right-panel" class="col-sm-9" style="padding: 10px;">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </body>
 </html>
