@@ -19,39 +19,46 @@
     <script src="https://code.highcharts.com/highcharts.js"></script></head>
 <body>
     <div id="wrap" style="position: absolute">
+        <a href="https://github.com/rafaelkallis/github-repository-analytics"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
         <div>
-            <input id="input" type="text" placeholder=""/>
-            <div id="analytics-panel" class="container" style="display: none">
-                <div class="row">
-                    <div id="left-panel" class="col-sm-3" style="display: flex;">
-                        <div>
-                            <a id="owner-url"><img id="owner-image"></a>
-                            <a id="repository-url"><span id="repository-name" style="font-size: 1.5em;"></span></a>
-                            <div id="repository-attributes">
-                                <div class="col-sm-4">
-                                    <i class="fa fa-eye fa-2x" aria-hidden="true" style="display: block;"></i>
-                                    <span id="repository-subscribers"></span>
+            <div id="content-wrapper">
+                <span id="input-wrap">
+                    <input id="input" type="text" placeholder=""/>
+                    <i id="input-return-icon" class="fa fa-chevron-down fa-3x hoverable" aria-hidden="true" style="display: none;"></i>
+                </span>
+                <div id="analytics-wrap" class="container" style="display: none">
+                    <div class="row">
+                        <div id="left-panel" class="col-sm-3" style="display: flex;">
+                            <div>
+                                <a id="owner-url"><img id="owner-image"></a>
+                                <a id="repository-url"><span id="repository-name" style="font-size: 1.5em;"></span></a>
+                                <div id="repository-attributes">
+                                    <div class="col-sm-4">
+                                        <i class="fa fa-eye fa-2x" aria-hidden="true" style="display: block;"></i>
+                                        <span id="repository-subscribers"></span>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <i class="fa fa-star fa-2x" aria-hidden="true" style="display: block;"></i>
+                                        <span id="repository-stargazers"></span>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <i class="fa fa-code-fork fa-2x" aria-hidden="true" style="display: block;"></i>
+                                        <span id="repository-forks"></span>
+                                    </div>
                                 </div>
-                                <div class="col-sm-4">
-                                    <i class="fa fa-star fa-2x" aria-hidden="true" style="display: block;"></i>
-                                    <span id="repository-stargazers"></span>
-                                </div>
-                                <div class="col-sm-4">
-                                    <i class="fa fa-code-fork fa-2x" aria-hidden="true" style="display: block;"></i>
-                                    <span id="repository-forks"></span>
-                                </div>
+                                <span>Language: </span>
+                                <span id="repository-language"></span>
                             </div>
-                            <span>Language: </span>
-                            <span id="repository-language"></span>
                         </div>
-                    </div>
-                    <div id="right-panel" class="col-sm-9" style="padding: 10px;">
-
+                        <div id="right-panel" class="col-sm-9" style="padding: 10px;"></div>
+                        <i id="analytics-exit-icon" class="fa fa-times-circle fa-3x hoverable" aria-hidden="true"></i>
                     </div>
                 </div>
             </div>
+            <div id="project-by">
+                <span>A Project by <a href="http://rafaelkallis.com" target="_blank">Rafael Kallis</a>.</span>
+            </div>
         </div>
-
     </div>
 </body>
 </html>

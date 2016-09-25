@@ -1,6 +1,12 @@
 /**
  * Created by rafaelkallis on 24.09.16.
  */
+var input;
+var inputIcon;
+var inputWrap;
+var plotData;
+var limitExceeded = false;
+
 $(function () {
     var pattern = Trianglify({
         width: window.innerWidth,
@@ -8,72 +14,111 @@ $(function () {
     });
     document.body.appendChild(pattern.canvas());
 
-    var input = $('#input');
+    input = $('#input');
+    inputIcon = $('#input-return-icon');
+    inputWrap = $('#input-wrap');
 
     input.typed({
-        strings: ["rafaelkallis/github-repository-analytics","torvalds/linux","twbs/bootstrap"],
+        strings: ["rafaelkallis/github-repository-analytics", "torvalds/linux", "twbs/bootstrap"],
         typeSpeed: 20
+    });
+
+    input.on('change paste keyup', function () {
+        inputIcon.fadeIn();
+    });
+
+    inputIcon.on('click', function () {
+        pullData(input.val());
+    });
+
+    $('#analytics-exit-icon').on('click', function () {
+        showInput();
     });
 
     input.keyup(function (event) {
         if (event.keyCode == 13) {
-            var repository = input.val();
-            var plot_data;
-            var limit_exceeded = false;
-            $.when(
-                $.ajax({
-                    url: "https://api.github.com/rate_limit",
-                    success: function (data) {
-                        if (parseInt(data.resources.core.remaining) == 0) {
-                            limit_exceeded = true;
-                            alert("Rate limit exceeded");
-                        } else {
-                            input.fadeOut(100);
-                        }
-                    }
-                }),
-                $.ajax({
-                    url: "https://api.github.com/repos/" + repository,
-                    success: function (data) {
-                        $("#owner-url").attr("href", data.owner.html_url);
-                        $("#owner-image").attr("src", data.owner.avatar_url);
-                        $("#repository-url").attr("href", data.html_url);
-                        $("#repository-name").html(data.full_name);
-                        $("#repository-subscribers").html(data.subscribers_count);
-                        $("#repository-stargazers").html(data.stargazers_count);
-                        $("#repository-forks").html(data.forks_count);
-                        $("#repository-language").html(data.language);
-                    },
-                    error: function () {
-                        console.log("error pulling repo info")
-                    }
-                }),
-                $.ajax({
-                    url: "https://api.github.com/repos/" + repository + "/stats/commit_activity",
-                    success: function (data) {
-                        async.map(data, function (d, callback) {
-                            callback(null, [parseInt(d.week + "000"), parseInt(d.total)]);
-                        }, function (err, data) {
-                            plot_data = data;
-                        });
-                    },
-                    error: function () {
-                        console.log("error pulling repo activity");
-                    }
-                })).then(function () {
-                    if(!limit_exceeded) {
-                        $("#analytics-panel").fadeIn(100);
-                        plot(plot_data);
-                    } else {
-                        input.fadeIn();
-                    }
-            });
+            pullData(input.val());
         }
     });
 });
 
+function pullData(repositoryName) {
+    $.when(
+        $.ajax({
+            url: "https://api.github.com/rate_limit",
+            success: function (data) {
+                if (parseInt(data.resources.core.remaining) == 0) {
+                    limitExceeded = true;
+                }
+            }
+        }),
+        $.ajax({
+            url: "https://api.github.com/repos/" + repositoryName,
+            success: function (data) {
+                $("#owner-url").attr("href", data.owner.html_url);
+                $("#owner-image").attr("src", data.owner.avatar_url);
+                $("#repository-url").attr("href", data.html_url);
+                $("#repository-name").html(data.full_name);
+                $("#repository-subscribers").html(data.subscribers_count);
+                $("#repository-stargazers").html(data.stargazers_count);
+                $("#repository-forks").html(data.forks_count);
+                $("#repository-language").html(data.language);
+            },
+            error: function () {
+                console.log("error pulling repo info")
+            }
+        }),
+        $.ajax({
+            url: "https://api.github.com/repos/" + repositoryName + "/stats/commit_activity",
+            success: function (data) {
+                async.map(data, function (d, callback) {
+                    callback(null, [parseInt(d.week + "000"), parseInt(d.total)]);
+                }, function (err, data) {
+                    plotData = data;
+                });
+            },
+            error: function () {
+                console.log("error pulling repo activity");
+            }
+        })).then(function () {
+            if (!limitExceeded) {
+                showAnalytics();
+            } else {
+                alert("Limits Exceeded!")
+            }
+        }
+    );
+}
 
-function plot(data) {
+function showAnalytics(callback) {
+    inputWrap.fadeOut(50, function () {
+        $('#content-wrapper').animate({
+            'width': '1080px',
+            'height': '600px'
+        }, 'slow', function () {
+            $("#analytics-wrap").fadeIn(function () {
+                plot();
+                typeof callback == 'function' && callback();
+            });
+        });
+    });
+}
+
+function showInput(callback) {
+    $('#analytics-wrap').fadeOut(50, function () {
+        $('#content-wrapper').animate({
+            'width': '800px',
+            'height': '70px'
+        }, 'slow', function () {
+            inputWrap.fadeIn(function () {
+                typeof callback == 'function' && callback();
+            });
+        });
+    });
+}
+
+
+function plot() {
     $('#right-panel').highcharts({
         chart: {
             type: 'scatter',
@@ -150,7 +195,7 @@ function plot(data) {
             name: 'Commits per Week',
             color: 'rgba(223, 83, 83, 0.6)',
             enableMouseTracking: false,
-            data: data
+            data: plotData
 
         }
             // ,{
