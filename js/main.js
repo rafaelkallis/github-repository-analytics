@@ -33,30 +33,25 @@ $(function () {
 
 function pullData(repositoryName) {
     $.when(
-        $.ajax("https://api.github.com/rate_limit"),
         $.ajax("https://api.github.com/repos/" + repositoryName),
         $.ajax("https://api.github.com/repos/" + repositoryName + "/stats/commit_activity")
     ).then(
-        function (rateLimitResponse, repositoryResponse, activityResponse) {
-            if (parseInt(rateLimitResponse[0].resources.core.remaining) > 0) {
-                async.map(activityResponse[0], function (d, callback) {
-                    callback(null, [parseInt(d.week + "000"), parseInt(d.total)]);
-                }, function (err, activityProcessed) {
-                    showAnalyticsContent({
-                        'ownerHtmlUrl': repositoryResponse[0].owner.html_url,
-                        'ownerAvatarUrl': repositoryResponse[0].owner.avatar_url,
-                        'repositoryHtmlUrl': repositoryResponse[0].html_url,
-                        'repositoryName': repositoryResponse[0].full_name,
-                        'repositorySubscribersCount': repositoryResponse[0].subscribers_count,
-                        'repositoryStargazersCount': repositoryResponse[0].stargazers_count,
-                        'repositoryForksCount': repositoryResponse[0].forks_count,
-                        'repositoryLanguage': repositoryResponse[0].language,
-                        'activity': activityProcessed
-                    });
+        function (repositoryResponse, activityResponse) {
+            async.map(activityResponse[0], function (d, callback) {
+                callback(null, [parseInt(d.week + "000"), parseInt(d.total)]);
+            }, function (err, activityProcessed) {
+                showAnalyticsContent({
+                    'ownerHtmlUrl': repositoryResponse[0].owner.html_url,
+                    'ownerAvatarUrl': repositoryResponse[0].owner.avatar_url,
+                    'repositoryHtmlUrl': repositoryResponse[0].html_url,
+                    'repositoryName': repositoryResponse[0].full_name,
+                    'repositorySubscribersCount': repositoryResponse[0].subscribers_count,
+                    'repositoryStargazersCount': repositoryResponse[0].stargazers_count,
+                    'repositoryForksCount': repositoryResponse[0].forks_count,
+                    'repositoryLanguage': repositoryResponse[0].language,
+                    'activity': activityProcessed
                 });
-            } else {
-                alert("Rate limit exceeded!");
-            }
+            });
         }, function () {
             $('#content-wrapper').effect('shake');
         });
