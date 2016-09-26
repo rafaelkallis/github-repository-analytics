@@ -13,5 +13,6 @@
     <orderEntry type="library" name="async" level="application" />
     <orderEntry type="library" name="d3.v3" level="application" />
     <orderEntry type="library" name="highcharts" level="application" />
+    <orderEntry type="library" name="jquery-ui" level="application" />
   </component>
 </module>

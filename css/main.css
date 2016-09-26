@@ -68,8 +68,6 @@
 #analytics-wrap {
     width: 100%;
     height: 100%;
-    border-radius: 20px;
-    background-color: rgba(0, 0, 0, 0.85);
 }
 
 .hoverable {
@@ -83,7 +81,7 @@
     margin-top: -640px;
     position: relative;
     z-index: 2;
-    color: rgba(0, 0, 0, 0.85);
+    color: rgba(0, 0, 0, 0.75);
 }
 
 #left-panel {
