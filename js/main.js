@@ -17,7 +17,7 @@ $(function () {
     });
 
     $('#input-return-icon').on('click', function () {
-        pullData($('#input').val());
+        pullData($('#input').val(), 5);
     });
 
     $('#analytics-exit-icon').on('click', function () {
@@ -26,58 +26,81 @@ $(function () {
 
     $('#input').keyup(function (event) {
         if (event.keyCode == 13) { // enter / return
-            pullData($('#input').val());
+            pullData($('#input').val(), 5);
         }
     });
 });
 
-function pullData(repositoryName) {
-    $.when(
-        $.ajax("https://api.github.com/repos/" + repositoryName),
-        $.ajax("https://api.github.com/repos/" + repositoryName + "/stats/commit_activity")
-    ).then(
-        function (repositoryResponse, activityResponse) {
-            async.map(activityResponse[0], function (d, callback) {
-                callback(null, [parseInt(d.week + "000"), parseInt(d.total)]);
-            }, function (err, activityProcessed) {
-                showAnalyticsContent({
-                    'ownerHtmlUrl': repositoryResponse[0].owner.html_url,
-                    'ownerAvatarUrl': repositoryResponse[0].owner.avatar_url,
-                    'repositoryHtmlUrl': repositoryResponse[0].html_url,
-                    'repositoryName': repositoryResponse[0].full_name,
-                    'repositorySubscribersCount': repositoryResponse[0].subscribers_count,
-                    'repositoryStargazersCount': repositoryResponse[0].stargazers_count,
-                    'repositoryForksCount': repositoryResponse[0].forks_count,
-                    'repositoryLanguage': repositoryResponse[0].language,
-                    'activity': activityProcessed
-                });
-            });
-        }, function () {
-            $('#content-wrapper').effect('shake');
+function pullData(repositoryName, attempt) {
+    if (attempt > 0) {
+        $.when(
+            $.ajax("https://api.github.com/repos/" + repositoryName + "/stats/commit_activity"),
+            $.ajax("https://api.github.com/repos/" + repositoryName)
+        ).done(
+            function (activityResponse, repositoryResponse) {
+                if (activityResponse[2].statusText == "OK" && repositoryResponse[2].statusText == "OK") {
+                    var repositoryData = repositoryResponse[0];
+                    async.map(activityResponse[0], function (d, callback) {
+                        callback(null, [parseInt(d.week + "000"), parseInt(d.total)]);
+                    }, function (err, activityData) {
+                        updateRepositoryInfo({
+                            'ownerHtmlUrl': repositoryData.owner.html_url,
+                            'ownerAvatarUrl': repositoryData.owner.avatar_url,
+                            'repositoryHtmlUrl': repositoryData.html_url,
+                            'repositoryName': repositoryData.full_name,
+                            'repositorySubscribersCount': repositoryData.subscribers_count,
+                            'repositoryStargazersCount': repositoryData.stargazers_count,
+                            'repositoryForksCount': repositoryData.forks_count,
+                            'repositoryLanguage': repositoryData.language
+                        });
+                        showAnalyticsContent(activityData);
+                    });
+                } else {
+                    pullData(repositoryName, attempt - 1);
+                }
+            }
+        ).fail(function (err) {
+            if (err.status == 403) {
+                $.ajax("https://api.github.com/rate_limit", {
+                    success: function (data) {
+                        var time = new Date(parseInt(data.resources.core.reset + "000"));
+                        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                        showInputError("Limit exceeded. You can get more analytics from " + days[time.getDay()] + " " + time.getHours() + ":" + time.getMinutes());
+                    }
+                })
+            } else {
+                showInputError("Repository not found.");
+            }
         });
+    } else {
+        showInputError("GitHub is currently busy processing, try another repository instead.");
+    }
+
 }
 
-function showAnalyticsContent(data) {
-    $.when(
-        $('#owner-url').attr('href', data.ownerHtmlUrl),
-        $('#owner-image').attr('src', data.ownerAvatarUrl),
-        $('#repository-url').attr('href', data.repositoryHtmlUrl),
-        $('#repository-name').html(data.repositoryName),
-        $('#repository-subscribers').html(data.repositorySubscribersCount),
-        $('#repository-stargazers').html(data.repositoryStargazersCount),
-        $('#repository-forks').html(data.repositoryForksCount),
-        $('#repository-language').html(data.repositoryLanguage),
-        $('#input-wrap').fadeOut(50, function () {
-            $('#content-wrapper').animate({
-                'width': '1080px',
-                'height': '600px'
-            }, 'slow', function () {
-                $("#analytics-wrap").fadeIn(function () {
-                    plot(data.activity);
-                });
+function updateRepositoryInfo(repositoryData) {
+    $('#owner-url').attr('href', repositoryData.ownerHtmlUrl);
+    $('#owner-image').attr('src', repositoryData.ownerAvatarUrl);
+    $('#repository-url').attr('href', repositoryData.repositoryHtmlUrl);
+    $('#repository-name').html(repositoryData.repositoryName);
+    $('#repository-subscribers').html(repositoryData.repositorySubscribersCount);
+    $('#repository-stargazers').html(repositoryData.repositoryStargazersCount);
+    $('#repository-forks').html(repositoryData.repositoryForksCount);
+    $('#repository-language').html(repositoryData.repositoryLanguage);
+}
+
+function showAnalyticsContent(activityData) {
+    $('#input-wrap').fadeOut(50, function () {
+        hideInputError();
+        $('#content-wrapper').animate({
+            'width': '1080px',
+            'height': '600px'
+        }, 'slow', function () {
+            $("#analytics-wrap").fadeIn(function () {
+                plot(activityData);
             });
-        })
-    );
+        });
+    });
 }
 
 function showInputContent() {
@@ -90,6 +113,18 @@ function showInputContent() {
             $('#input-wrap').fadeIn()
         });
     });
+}
+
+function showInputError(message) {
+    var errorMessage = $('#error-message');
+    errorMessage.html(message);
+    errorMessage.fadeIn(function () {
+        $('#content-wrapper').effect('shake');
+    });
+}
+
+function hideInputError() {
+    $('#error-message').hide();
 }
 
 function plot(activityData) {
